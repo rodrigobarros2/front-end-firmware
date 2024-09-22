@@ -45,7 +45,9 @@ export function ThemeProvider({
 
   return (
     <ThemeProviderContext.Provider value={value}>
-      {children}
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        {children}
+      </div>
     </ThemeProviderContext.Provider>
   );
 }

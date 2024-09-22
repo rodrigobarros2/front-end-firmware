@@ -1,17 +1,19 @@
-import { ThemeProvider } from "./components/theme-provider";
 import { RouterProvider } from "react-router-dom";
-import { router } from "./routes";
+import { ThemeProvider } from "./components/theme-provider";
 import { ToastContainer } from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
+import { router } from "./routes";
+import AuthProvider from "./hooks/AuthContext";
 
-
-export function App() {
+function App() {
   return (
-    <div>
-      <ThemeProvider>
-        <ToastContainer />
+    <ThemeProvider>
+      <ToastContainer />
+      <AuthProvider>
         <RouterProvider router={router} />
-      </ThemeProvider>
-    </div>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
+
+export default App;
