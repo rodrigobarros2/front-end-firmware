@@ -26,65 +26,39 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { useAuth } from "@/hooks/AuthContext";
+import { getFirmwareList } from "@/services/api";
 
 interface TVFirmware {
   id: string;
-  name: string;
-  brand: string;
-  version: string;
-  releaseDate: string;
-  price: number;
+  modelo: string;
+  descricao: string;
+  comoAtualizar: string;
 }
-
-const mockData: TVFirmware[] = [
-  {
-    id: "1",
-    name: "Firmware A",
-    brand: "Samsung",
-    version: "1.0.0",
-    releaseDate: "2023-01-15",
-    price: 9.99,
-  },
-  {
-    id: "2",
-    name: "Firmware B",
-    brand: "LG",
-    version: "2.1.0",
-    releaseDate: "2023-02-20",
-    price: 14.99,
-  },
-  {
-    id: "3",
-    name: "Firmware C",
-    brand: "Sony",
-    version: "1.5.0",
-    releaseDate: "2023-03-10",
-    price: 12.99,
-  },
-  {
-    id: "4",
-    name: "Firmware D",
-    brand: "Samsung",
-    version: "2.0.1",
-    releaseDate: "2023-04-05",
-    price: 19.99,
-  },
-  {
-    id: "5",
-    name: "Firmware E",
-    brand: "LG",
-    version: "3.0.0",
-    releaseDate: "2023-05-12",
-    price: 24.99,
-  },
-];
 
 export function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [firmwares, setFirmwares] = useState<TVFirmware[]>(mockData);
+
+  const [firmwares, setFirmwares] = useState<TVFirmware[]>([]);
   const [brandFilter, setBrandFilter] = useState<string>("all");
   const [nameFilter, setNameFilter] = useState<string>("");
+
+  useEffect(() => {
+    const fetchFirmwares = async () => {
+      try {
+        const data = await getFirmwareList();
+        setFirmwares(data);
+      } catch (error) {
+        if (error instanceof Error) {
+          console.log(error.message);
+        } else {
+          console.log("An unknown error occurred");
+        }
+      }
+    };
+
+    fetchFirmwares();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -95,15 +69,12 @@ export function Dashboard() {
     navigate(`/checkout/${firmware.id}`, { state: { firmware } });
   };
 
-  useEffect(() => {
-    const filteredFirmwares = mockData.filter(
-      (firmware) =>
-        (brandFilter === "all" || firmware.brand === brandFilter) &&
-        (nameFilter === "" ||
-          firmware.name.toLowerCase().includes(nameFilter.toLowerCase()))
-    );
-    setFirmwares(filteredFirmwares);
-  }, [brandFilter, nameFilter]);
+  const filteredFirmwares = firmwares.filter(
+    (firmware) =>
+      (brandFilter === "all" || firmware.modelo === brandFilter) &&
+      (nameFilter === "" ||
+        firmware.modelo.toLowerCase().includes(nameFilter.toLowerCase()))
+  );
 
   return (
     <Card className="w-full max-w-4xl">
@@ -138,22 +109,18 @@ export function Dashboard() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Marca</TableHead>
-              <TableHead>Versão</TableHead>
-              <TableHead>Data de Lançamento</TableHead>
-              <TableHead>Preço</TableHead>
+              <TableHead>Modelo</TableHead>
+              <TableHead>Descrição</TableHead>
+              <TableHead>Como Atualizar</TableHead>
               <TableHead>Ação</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {firmwares.map((firmware) => (
+            {filteredFirmwares.map((firmware) => (
               <TableRow key={firmware.id}>
-                <TableCell>{firmware.name}</TableCell>
-                <TableCell>{firmware.brand}</TableCell>
-                <TableCell>{firmware.version}</TableCell>
-                <TableCell>{firmware.releaseDate}</TableCell>
-                <TableCell>R$ {firmware.price.toFixed(2)}</TableCell>
+                <TableCell>{firmware.modelo}</TableCell>
+                <TableCell>{firmware.descricao}</TableCell>
+                <TableCell>{firmware.comoAtualizar}</TableCell>
                 <TableCell>
                   <Button onClick={() => handleFirmwareClick(firmware)}>
                     Comprar
